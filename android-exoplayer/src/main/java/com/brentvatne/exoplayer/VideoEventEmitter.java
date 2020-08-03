@@ -107,10 +107,8 @@ class VideoEventEmitter {
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
     private static final String EVENT_PROP_CURRENT_TIME = "currentTime";
-    private static final String EVENT_PROP_CURRENT_PLAYBACK_TIME = "currentPlaybackTime";
     private static final String EVENT_PROP_SEEK_TIME = "seekTime";
     private static final String EVENT_PROP_NATURAL_SIZE = "naturalSize";
-    private static final String EVENT_PROP_TRACK_ID = "trackId";
     private static final String EVENT_PROP_WIDTH = "width";
     private static final String EVENT_PROP_HEIGHT = "height";
     private static final String EVENT_PROP_ORIENTATION = "orientation";
@@ -139,7 +137,7 @@ class VideoEventEmitter {
     }
 
     void load(double duration, double currentPosition, int videoWidth, int videoHeight,
-              WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks, String trackId) {
+              WritableArray audioTracks, WritableArray textTracks, WritableArray videoTracks) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_DURATION, duration / 1000D);
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
@@ -153,7 +151,7 @@ class VideoEventEmitter {
             naturalSize.putString(EVENT_PROP_ORIENTATION, "portrait");
         }
         event.putMap(EVENT_PROP_NATURAL_SIZE, naturalSize);
-        event.putString(EVENT_PROP_TRACK_ID, trackId);
+
         event.putArray(EVENT_PROP_VIDEO_TRACKS, videoTracks);
         event.putArray(EVENT_PROP_AUDIO_TRACKS, audioTracks);
         event.putArray(EVENT_PROP_TEXT_TRACKS, textTracks);
@@ -170,21 +168,17 @@ class VideoEventEmitter {
         receiveEvent(EVENT_LOAD, event);
     }
 
-    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration, double currentPlaybackTime) {
+    void progressChanged(double currentPosition, double bufferedDuration, double seekableDuration) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_CURRENT_TIME, currentPosition / 1000D);
         event.putDouble(EVENT_PROP_PLAYABLE_DURATION, bufferedDuration / 1000D);
         event.putDouble(EVENT_PROP_SEEKABLE_DURATION, seekableDuration / 1000D);
-        event.putDouble(EVENT_PROP_CURRENT_PLAYBACK_TIME, currentPlaybackTime);
         receiveEvent(EVENT_PROGRESS, event);
     }
 
-    void bandwidthReport(double bitRateEstimate, int height, int width, String id) {
+    void bandwidthReport(double bitRateEstimate) {
         WritableMap event = Arguments.createMap();
         event.putDouble(EVENT_PROP_BITRATE, bitRateEstimate);
-        event.putInt(EVENT_PROP_WIDTH, width);
-        event.putInt(EVENT_PROP_HEIGHT, height);
-        event.putString(EVENT_PROP_TRACK_ID, id);
         receiveEvent(EVENT_BANDWIDTH, event);
     }    
 
@@ -232,7 +226,7 @@ class VideoEventEmitter {
     void error(String errorString, Exception exception) {
         WritableMap error = Arguments.createMap();
         error.putString(EVENT_PROP_ERROR_STRING, errorString);
-        error.putString(EVENT_PROP_ERROR_EXCEPTION, exception.toString());
+        error.putString(EVENT_PROP_ERROR_EXCEPTION, exception.getMessage());
         WritableMap event = Arguments.createMap();
         event.putMap(EVENT_PROP_ERROR, error);
         receiveEvent(EVENT_ERROR, event);
