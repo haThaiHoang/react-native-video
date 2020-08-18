@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceView;
 import android.view.TextureView;
@@ -12,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.daasuu.epf.EPlayerView;
+import com.daasuu.epf.PlayerScaleType;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -21,7 +22,6 @@ import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.Cue;
 import com.google.android.exoplayer2.text.TextRenderer;
-import com.google.android.exoplayer2.text.TextOutput;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SubtitleView;
 
@@ -38,9 +38,10 @@ public final class ExoPlayerView extends FrameLayout {
     private SimpleExoPlayer player;
     private Context context;
     private ViewGroup.LayoutParams layoutParams;
-
+    private String filterText;
     private boolean useTextureView = true;
     private boolean hideShutterView = false;
+    private boolean filterEnabled = false;
 
     public ExoPlayerView(Context context) {
         this(context, null);
@@ -86,7 +87,12 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     private void setVideoView() {
-        if (surfaceView instanceof TextureView) {
+        if (surfaceView instanceof EPlayerView) {
+            ((EPlayerView) surfaceView).setSimpleExoPlayer(this.player);
+            if(this.filterText != null) {
+                this.setFilterHelper(filterText);
+            }
+        } else if (surfaceView instanceof TextureView) {
             player.setVideoTextureView((TextureView) surfaceView);
         } else if (surfaceView instanceof SurfaceView) {
             player.setVideoSurfaceView((SurfaceView) surfaceView);
@@ -94,10 +100,18 @@ public final class ExoPlayerView extends FrameLayout {
     }
 
     private void updateSurfaceView() {
-        View view = useTextureView ? new TextureView(context) : new SurfaceView(context);
-        view.setLayoutParams(layoutParams);
+        if(filterEnabled) {
+            EPlayerView viewFilter = new EPlayerView(this.getContext());
+            viewFilter.setPlayerScaleType(PlayerScaleType.RESIZE_NONE);
+            View view = viewFilter;
+            view.setLayoutParams(layoutParams);
+            surfaceView = view;
+        } else {
+            View view = useTextureView ? new TextureView(context) : new SurfaceView(context);
+            view.setLayoutParams(layoutParams);
+            surfaceView = view;
+        }
 
-        surfaceView = view;
         if (layout.getChildAt(0) != null) {
             layout.removeViewAt(0);
         }
@@ -152,19 +166,29 @@ public final class ExoPlayerView extends FrameLayout {
 
     }
 
-    /**
-     * Get the view onto which video is rendered. This is either a {@link SurfaceView} (default)
-     * or a {@link TextureView} if the {@code use_texture_view} view attribute has been set to true.
-     *
-     * @return either a {@link SurfaceView} or a {@link TextureView}.
-     */
-    public View getVideoSurfaceView() {
-        return surfaceView;
-    }
-
     public void setUseTextureView(boolean useTextureView) {
         if (useTextureView != this.useTextureView) {
             this.useTextureView = useTextureView;
+            updateSurfaceView();
+        }
+    }
+
+     public void setFilter(String filterText) {
+        //this.filterText = filterText;
+        setFilterHelper(filterText);
+
+    }
+
+    private void setFilterHelper(String filterType) {
+        if(surfaceView instanceof EPlayerView) {
+            String[] listFilter = filterType.split(":");
+            ((EPlayerView) surfaceView).setGlFilter(FilterType.createGlFilter(listFilter[0], listFilter[1], this.getContext()));
+        }
+    }
+
+    public void enableFilter(boolean filterEnabled) {
+        if(filterEnabled != this.filterEnabled) {
+            this.filterEnabled = filterEnabled;
             updateSurfaceView();
         }
     }
@@ -200,13 +224,8 @@ public final class ExoPlayerView extends FrameLayout {
         shutterView.setVisibility(VISIBLE);
     }
 
-    public void invalidateAspectRatio() {
-        // Resetting aspect ratio will force layout refresh on next video size changed
-        layout.invalidateAspectRatio();
-    }
-
     private final class ComponentListener implements SimpleExoPlayer.VideoListener,
-            TextOutput, ExoPlayer.EventListener {
+            TextRenderer.Output, ExoPlayer.EventListener {
 
         // TextRenderer.Output implementation
 

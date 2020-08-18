@@ -3,25 +3,19 @@ package com.brentvatne.exoplayer;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.facebook.react.bridge.ReactMethod;
-import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -32,10 +26,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SRC = "src";
     private static final String PROP_SRC_URI = "uri";
     private static final String PROP_SRC_TYPE = "type";
-    private static final String PROP_DRM = "drm";
-    private static final String PROP_DRM_TYPE = "type";
-    private static final String PROP_DRM_LICENSESERVER = "licenseServer";
-    private static final String PROP_DRM_HEADERS = "headers";
     private static final String PROP_SRC_HEADERS = "requestHeaders";
     private static final String PROP_RESIZE_MODE = "resizeMode";
     private static final String PROP_REPEAT = "repeat";
@@ -54,7 +44,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_BUFFER_CONFIG_MAX_BUFFER_MS = "maxBufferMs";
     private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_MS = "bufferForPlaybackMs";
     private static final String PROP_BUFFER_CONFIG_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = "bufferForPlaybackAfterRebufferMs";
-    private static final String PROP_PREVENTS_DISPLAY_SLEEP_DURING_VIDEO_PLAYBACK = "preventsDisplaySleepDuringVideoPlayback";
     private static final String PROP_PROGRESS_UPDATE_INTERVAL = "progressUpdateInterval";
     private static final String PROP_REPORT_BANDWIDTH = "reportBandwidth";
     private static final String PROP_SEEK = "seek";
@@ -70,12 +59,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
-
-    private ReactExoplayerConfig config;
-
-    public ReactExoplayerViewManager(ReactExoplayerConfig config) {
-        this.config = config;
-    }
+    private static final String PROP_FILTER = "filter";
+    private static final String PROP_FILTER_ENABLED = "filterEnabled";
 
     @Override
     public String getName() {
@@ -84,7 +69,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
 
     @Override
     protected ReactExoplayerView createViewInstance(ThemedReactContext themedReactContext) {
-        return new ReactExoplayerView(themedReactContext, config);
+        return new ReactExoplayerView(themedReactContext);
     }
 
     @Override
@@ -111,37 +96,13 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
         );
     }
 
-    @ReactProp(name = PROP_DRM)
-    public void setDRM(final ReactExoplayerView videoView, @Nullable ReadableMap drm) {
-        if (drm != null && drm.hasKey(PROP_DRM_TYPE)) {
-            String drmType = drm.hasKey(PROP_DRM_TYPE) ? drm.getString(PROP_DRM_TYPE) : null;
-            String drmLicenseServer = drm.hasKey(PROP_DRM_LICENSESERVER) ? drm.getString(PROP_DRM_LICENSESERVER) : null;
-            ReadableMap drmHeaders = drm.hasKey(PROP_DRM_HEADERS) ? drm.getMap(PROP_DRM_HEADERS) : null;
-            if (drmType != null && drmLicenseServer != null && Util.getDrmUuid(drmType) != null) {
-                UUID drmUUID = Util.getDrmUuid(drmType);
-                videoView.setDrmType(drmUUID);
-                videoView.setDrmLicenseUrl(drmLicenseServer);
-                if (drmHeaders != null) {
-                    ArrayList<String> drmKeyRequestPropertiesList = new ArrayList<>();
-                    ReadableMapKeySetIterator itr = drmHeaders.keySetIterator();
-                    while (itr.hasNextKey()) {
-                        String key = itr.nextKey();
-                        drmKeyRequestPropertiesList.add(key);
-                        drmKeyRequestPropertiesList.add(drmHeaders.getString(key));
-                    }
-                    videoView.setDrmLicenseHeader(drmKeyRequestPropertiesList.toArray(new String[0]));
-                }
-                videoView.setUseTextureView(false);
-            }
-        }
-    }
-
     @ReactProp(name = PROP_SRC)
     public void setSrc(final ReactExoplayerView videoView, @Nullable ReadableMap src) {
         Context context = videoView.getContext().getApplicationContext();
         String uriString = src.hasKey(PROP_SRC_URI) ? src.getString(PROP_SRC_URI) : null;
         String extension = src.hasKey(PROP_SRC_TYPE) ? src.getString(PROP_SRC_TYPE) : null;
         Map<String, String> headers = src.hasKey(PROP_SRC_HEADERS) ? toStringMap(src.getMap(PROP_SRC_HEADERS)) : null;
+
 
         if (TextUtils.isEmpty(uriString)) {
             return;
@@ -183,11 +144,6 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_REPEAT, defaultBoolean = false)
     public void setRepeat(final ReactExoplayerView videoView, final boolean repeat) {
         videoView.setRepeatModifier(repeat);
-    }
-
-    @ReactProp(name = PROP_PREVENTS_DISPLAY_SLEEP_DURING_VIDEO_PLAYBACK, defaultBoolean = false)
-    public void setPreventsDisplaySleepDuringVideoPlayback(final ReactExoplayerView videoView, final boolean preventsSleep) {
-        videoView.setPreventsDisplaySleepDuringVideoPlayback(preventsSleep);
     }
 
     @ReactProp(name = PROP_SELECTED_VIDEO_TRACK)
@@ -311,6 +267,21 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)
     public void setControls(final ReactExoplayerView videoView, final boolean controls) {
         videoView.setControls(controls);
+    }
+
+    @ReactProp(name = PROP_FILTER)
+    public void setFilter(final ReactExoplayerView videoView, final String filterText) {
+        try {
+            //FilterType filterType = FilterType.valueOf(filterText);
+            videoView.setFilter(filterText);
+        } catch (Error err) {
+            videoView.setFilter(FilterType.DEFAULT.toString());
+        }
+    }
+
+    @ReactProp(name = PROP_FILTER_ENABLED)
+    public void setFilterEnabled(final ReactExoplayerView videoView, final boolean filterEnabled) {
+        videoView.enableFilter(filterEnabled);
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)

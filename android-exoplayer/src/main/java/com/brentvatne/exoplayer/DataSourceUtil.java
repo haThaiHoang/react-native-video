@@ -1,5 +1,8 @@
 package com.brentvatne.exoplayer;
 
+import android.content.Context;
+import android.content.ContextWrapper;
+
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.modules.network.CookieJarContainer;
 import com.facebook.react.modules.network.ForwardingCookieHandler;
@@ -11,9 +14,11 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.util.Util;
 
+import okhttp3.Cookie;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import java.util.Map;
+
 
 public class DataSourceUtil {
 
@@ -22,7 +27,6 @@ public class DataSourceUtil {
 
     private static DataSource.Factory rawDataSourceFactory = null;
     private static DataSource.Factory defaultDataSourceFactory = null;
-    private static HttpDataSource.Factory defaultHttpDataSourceFactory = null;
     private static String userAgent = null;
 
     public static void setUserAgent(String userAgent) {
@@ -57,17 +61,6 @@ public class DataSourceUtil {
 
     public static void setDefaultDataSourceFactory(DataSource.Factory factory) {
         DataSourceUtil.defaultDataSourceFactory = factory;
-    }
-
-    public static HttpDataSource.Factory getDefaultHttpDataSourceFactory(ReactContext context, DefaultBandwidthMeter bandwidthMeter, Map<String, String> requestHeaders) {
-        if (defaultHttpDataSourceFactory == null || (requestHeaders != null && !requestHeaders.isEmpty())) {
-            defaultHttpDataSourceFactory = buildHttpDataSourceFactory(context, bandwidthMeter, requestHeaders);
-        }
-        return defaultHttpDataSourceFactory;
-    }
-
-    public static void setDefaultHttpDataSourceFactory(HttpDataSource.Factory factory) {
-        DataSourceUtil.defaultHttpDataSourceFactory = factory;
     }
 
     private static DataSource.Factory buildRawDataSourceFactory(ReactContext context) {
