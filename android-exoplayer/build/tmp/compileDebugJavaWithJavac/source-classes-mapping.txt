@@ -1,0 +1,39 @@
+com/brentvatne/exoplayer/ResizeMode.java
+ com.brentvatne.exoplayer.ResizeMode
+ com.brentvatne.exoplayer.ResizeMode$Mode
+com/brentvatne/exoplayer/ExoPlayerView.java
+ com.brentvatne.exoplayer.ExoPlayerView
+ com.brentvatne.exoplayer.ExoPlayerView$1
+ com.brentvatne.exoplayer.ExoPlayerView$ComponentListener
+com/brentvatne/react/ReactVideoPackage.java
+ com.brentvatne.react.ReactVideoPackage
+com/brentvatne/exoplayer/DefaultReactExoplayerConfig.java
+ com.brentvatne.exoplayer.DefaultReactExoplayerConfig
+com/brentvatne/react/BuildConfig.java
+ com.brentvatne.react.BuildConfig
+com/brentvatne/receiver/AudioBecomingNoisyReceiver.java
+ com.brentvatne.receiver.AudioBecomingNoisyReceiver
+com/brentvatne/receiver/BecomingNoisyListener.java
+ com.brentvatne.receiver.BecomingNoisyListener
+ com.brentvatne.receiver.BecomingNoisyListener$1
+com/brentvatne/exoplayer/ReactExoplayerConfig.java
+ com.brentvatne.exoplayer.ReactExoplayerConfig
+com/brentvatne/exoplayer/DataSourceUtil.java
+ com.brentvatne.exoplayer.DataSourceUtil
+com/brentvatne/exoplayer/RawResourceDataSourceFactory.java
+ com.brentvatne.exoplayer.RawResourceDataSourceFactory
+com/brentvatne/exoplayer/ReactExoplayerViewManager.java
+ com.brentvatne.exoplayer.ReactExoplayerViewManager
+com/brentvatne/exoplayer/VideoEventEmitter.java
+ com.brentvatne.exoplayer.VideoEventEmitter
+ com.brentvatne.exoplayer.VideoEventEmitter$VideoEvents
+com/brentvatne/exoplayer/ReactExoplayerView.java
+ com.brentvatne.exoplayer.ReactExoplayerView
+ com.brentvatne.exoplayer.ReactExoplayerView$1
+ com.brentvatne.exoplayer.ReactExoplayerView$2
+ com.brentvatne.exoplayer.ReactExoplayerView$3
+ com.brentvatne.exoplayer.ReactExoplayerView$4
+ com.brentvatne.exoplayer.ReactExoplayerView$5
+ com.brentvatne.exoplayer.ReactExoplayerView$6
+com/brentvatne/exoplayer/AspectRatioFrameLayout.java
+ com.brentvatne.exoplayer.AspectRatioFrameLayout
