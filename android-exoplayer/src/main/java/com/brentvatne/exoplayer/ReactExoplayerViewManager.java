@@ -70,6 +70,8 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
     private static final String PROP_CONTROLS = "controls";
+    private static final String PROP_FILTER = "filter";
+    private static final String PROP_FILTER_ENABLED = "filterEnabled";
 
     private ReactExoplayerConfig config;
 
@@ -311,6 +313,19 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     @ReactProp(name = PROP_CONTROLS, defaultBoolean = false)
     public void setControls(final ReactExoplayerView videoView, final boolean controls) {
         videoView.setControls(controls);
+    }
+
+    @ReactProp(name = PROP_FILTER)
+    public void setFilter(final ReactExoplayerView videoView, final String filterText) {
+        try {
+            videoView.setFilter(filterText);
+        } catch (Error err) {
+            videoView.setFilter(FilterType.DEFAULT.toString());
+        }
+    }
+    @ReactProp(name = PROP_FILTER_ENABLED)
+    public void setFilterEnabled(final ReactExoplayerView videoView, final boolean filterEnabled) {
+        videoView.enableFilter(filterEnabled);
     }
 
     @ReactProp(name = PROP_BUFFER_CONFIG)
