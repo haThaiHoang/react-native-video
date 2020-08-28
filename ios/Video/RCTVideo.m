@@ -97,7 +97,7 @@ static int const RCTVideoUnset = -1;
 {
   if ((self = [super init])) {
     _eventDispatcher = eventDispatcher;
-	  _automaticallyWaitsToMinimizeStalling = YES;
+    _automaticallyWaitsToMinimizeStalling = YES;
     _playbackRateObserverRegistered = NO;
     _isExternalPlaybackActiveObserverRegistered = NO;
     _playbackStalled = NO;
@@ -1053,8 +1053,8 @@ static int const RCTVideoUnset = -1;
 
 - (void)setAutomaticallyWaitsToMinimizeStalling:(BOOL)waits
 {
-	_automaticallyWaitsToMinimizeStalling = waits;
-	_player.automaticallyWaitsToMinimizeStalling = waits;
+  _automaticallyWaitsToMinimizeStalling = waits;
+  _player.automaticallyWaitsToMinimizeStalling = waits;
 }
 
 
@@ -1516,19 +1516,36 @@ static int const RCTVideoUnset = -1;
     return;
   }
   
-  CIFilter *filter = [CIFilter filterWithName:filterName];
-  _playerItem.videoComposition = [AVVideoComposition
-                                  videoCompositionWithAsset:_playerItem.asset
-                                  applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
-                                    if (filter == nil) {
-                                      [request finishWithImage:request.sourceImage context:nil];
-                                    } else {
-                                      CIImage *image = request.sourceImage.imageByClampingToExtent;
-                                      [filter setValue:image forKey:kCIInputImageKey];
-                                      CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
-                                      [request finishWithImage:output context:nil];
-                                    }
-                                  }];
+  NSArray *array = [filterName componentsSeparatedByString:@":"];
+  CIFilter *filter = [CIFilter filterWithName:array[0]];
+  if (@available(iOS 9.0, *)) {
+      _playerItem.videoComposition = [AVVideoComposition
+                                      videoCompositionWithAsset:_playerItem.asset
+                                      applyingCIFiltersWithHandler:^(AVAsynchronousCIImageFilteringRequest *_Nonnull request) {
+          if (filter == nil) {
+              [request finishWithImage:request.sourceImage context:nil];
+          } else {
+              if ([array[0] isEqual:@"CIWhitePointAdjust"]) {
+                  NSArray *listIndex = [array[1] componentsSeparatedByString:@","];
+                  float red = [listIndex[0] floatValue];
+                  float green = [listIndex[1] floatValue];
+                  float blue = [listIndex[2] floatValue];
+                  [filter setValue:[CIColor colorWithRed:red green:green blue:blue alpha:1.0] forKey:@"inputColor"];
+              } else if ([array[0] isEqual:@"CIColorControls"]){
+                  NSArray *listIndex = [array[1] componentsSeparatedByString:@","];
+                  float contrast = [listIndex[0] floatValue];
+                  [filter setValue:[NSNumber numberWithFloat:contrast] forKey:@"inputContrast"];
+              }
+
+              CIImage *image = request.sourceImage.imageByClampingToExtent;
+              [filter setValue:image forKey:kCIInputImageKey];
+              CIImage *output = [filter.outputImage imageByCroppingToRect:request.sourceImage.extent];
+              [request finishWithImage:output context:nil];
+          }
+      }];
+  } else {
+      // Fallback on earlier versions
+  }
 }
 
 - (void)setFilterEnabled:(BOOL)filterEnabled {

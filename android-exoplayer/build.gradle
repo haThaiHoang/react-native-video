@@ -32,6 +32,10 @@ dependencies {
         exclude group: 'com.android.support'
     }
 
+    // Filter Library for Android
+    implementation 'com.github.dungnguyen115:epf-filter-android:v1.0.3'
+    implementation 'com.github.MasayukiSuda:Mp4Composer-android:v0.2.0'
+
     // All support libs must use the same version
     implementation "androidx.annotation:annotation:1.1.0"
     implementation "androidx.core:core:1.1.0"
