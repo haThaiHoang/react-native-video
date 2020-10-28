@@ -383,7 +383,9 @@ static int const RCTVideoUnset = -1;
       }
       
       self->_player = [AVPlayer playerWithPlayerItem:self->_playerItem];
-      [self touchPlayerLayer];
+      if(self->_filterEnabled) {
+        [self touchPlayerLayer];
+      }
       self->_player.actionAtItemEnd = AVPlayerActionAtItemEndNone;
       
       [self->_player addObserver:self forKeyPath:playbackRate options:0 context:nil];
